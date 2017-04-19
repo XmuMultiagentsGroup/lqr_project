@@ -11,13 +11,38 @@ t     = in(9);
 
 x = [z; theta; h; zdot; thetadot; hdot];
 
-%equilibrium
+%___equilibrium___
 Fe = (P.mc+2*P.mr)*P.g;
 
-%error
-%error_h = h - h_d;
+%___add integrators___
 
-%error_z = z - z_d;
+%_integrator on h
+error_h = h_d - h;
+persistent integrator_h
+persistent error_d1_h
+% reset persistent variables at start of simulation
+if t<P.Ts==1,
+    integrator_h  = 0;
+    error_d1_h   = 0;
+end
+if abs(x(6))<0.1,  % note that x6=hdot
+    integrator_h = integrator_h + (P.Ts/2)*(error_h+error_d1_h);
+end
+error_d1_h = error_h;
+
+%_integrator on z
+error_z = z - z_d;
+persistent integrator_z
+persistent error_d1_z
+% reset persistent variables at start of simulation
+if t<P.Ts==1,
+    integrator_z  = 0;
+    error_d1_z   = 0;
+end
+if abs(x(4))<0.1,  % note that x4=zdot
+    integrator_z = integrator_z + (P.Ts/2)*(error_z +error_d1_z);
+end
+error_d1_z = error_z;
 
 
 %___LQR stuff___
@@ -27,6 +52,10 @@ x_desired = [z_d; 0; h_d; 0; 0; 0];
 
 %calculate the output u
 u = -P.K_lqr*(x - x_desired);
+
+%add the extra output from the integrator
+u(2,1) = u(2,1) + P.k_integrator_h*integrator_h;
+u(1,1) = u(1,1) + P.k_integrator_z*integrator_z;
 
 %apply saturation
 F_out = sat(u(2,1) + Fe, 2*P.fmax);
