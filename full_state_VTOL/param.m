@@ -208,14 +208,18 @@ P.D_full = [0; 0; 0];
 P.Q = [1, 0, 0, 0, 0, 0;
        0, 1, 0, 0, 0, 0;
        0, 0, 200, 0, 0, 0;
-       0, 0, 0, 1, 0, 0;
+       0, 0, 0, 2, 0, 0;
        0, 0, 0, 0, 1, 0;
-       0, 0, 0, 0, 0, 100];
+       0, 0, 0, 0, 0, 500];
 P.R = [1, 0;
        0, 1];
 
 %compute gain K
 P.K_lqr = lqr(P.A_full, P.B_full, P.Q, P.R);
+
+%integrator gains for steady-state error
+P.k_integrator_z = 0.0;
+P.k_integrator_h = 0.0;
 
 
 

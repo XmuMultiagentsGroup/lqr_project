@@ -1,56 +1,51 @@
-function output = Planar_VTOL_SSctrl(in,P)
+function output = SSctrl_full_state_fb(in,P)
 h_d   = in(1);
 z_d   = in(2);
 z     = in(3);
-h     = in(4);
-theta = in(5);
+theta     = in(4);
+h = in(5);
 zdot     = in(6);
-hdot     = in(7);
-thetadot = in(8);
+thetadot     = in(7);
+hdot = in(8);
 t     = in(9);
 
-x = [z; h; theta; zdot; hdot; thetadot];
+x = [z; theta; h; zdot; thetadot; hdot];
 
 %equilibrium
 Fe = (P.mc+2*P.mr)*P.g;
 
 %error
-% integrator on h
-error_h = h_d - h;
-persistent integrator_h
-persistent error_d1_h
-% reset persistent variables at start of simulation
-if t==0,
-    integrator_h  = 0;
-    error_d1_h   = 0;
-end
-if abs(x(5))<0.1,  % note that x(5) = hdot
-    integrator_h = integrator_h + (P.Ts/2)*(error_h+error_d1_h);
-end
-error_d1_h = error_h;
+%error_h = h - h_d;
 
-% integrator on z
-error_z = z_d - z;
-persistent integrator_z
-persistent error_d1_z
-% reset persistent variables at start of simulation
-if t==0,
-    integrator_z  = 0;
-    error_d1_z   = 0;
-end
-if abs(x(4))<0.1,  % note that x(4) = zdot
-    integrator_z = integrator_z + (P.Ts/2)*(error_z+error_d1_z);
-end
-error_d1_z = error_z;
-
-%LQR stuff
-%x_reorder = [x(1,1); x(3,1); x(2,1); x(4); x(6); x(5)];
-x_reorder = [-error_z; x(3,1); -error_h; x(4); x(6); x(5)];
+%error_z = z - z_d;
 
 
-u = -P.K_lqr*x_reorder;
-output = [u(2,1) + Fe; u(1,1)];
-%output = [Fe; 0];
+%___LQR stuff___
+
+%desired state
+x_desired = [z_d; 0; h_d; 0; 0; 0];
+
+%calculate the output u
+u = -P.K_lqr*(x - x_desired);
+
+%apply saturation
+F_out = sat(u(2,1) + Fe, 2*P.fmax);
+T_out = sat(u(1,1), P.taumax);
+
+%send the output
+output = [F_out; T_out];
+
+% %integrator on h anti-windup
+% if P.k_integrator_h ~= 0,
+%     F_unsat = P.Fe + F_tilde;
+%     integrator_h = integrator_h + P.Ts/P.k_integrator_h*(F_out - F_unsat);
+% end
+% 
+% %integrator on z anti-windup
+% if P.k_integrator_z ~= 0,
+%     T_unsat = u(1,1);
+%     integrator_z = integrator_z + P.Ts/P.k_integrator_z*(T_out - T_unsat);
+% end
 
 
 

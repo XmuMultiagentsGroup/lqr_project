@@ -77,7 +77,8 @@ sys = simsizes(sizes);
 %
 % initialize the initial conditions
 %
-x0  = [AP.z0; AP.h0; AP.theta0; AP.zdot0; AP.hdot0; AP.thetadot0];
+%x0  = [AP.z0; AP.h0; AP.theta0; AP.zdot0; AP.hdot0; AP.thetadot0];
+x0  = [AP.z0; AP.theta0; AP.h0; AP.zdot0; AP.thetadot0; AP.hdot0];
 
 %
 % str is always an empty matrix
@@ -106,11 +107,11 @@ simStateCompliance = 'UnknownSimState';
 %
 function sys=mdlDerivatives(t,x,u,AP)
   %z        = x(1)
-  %h        = x(2);
-  theta    = x(3);
+  theta    = x(2);
+  %h        = x(3);
   zdot     = x(4);
-  hdot     = x(5);
-  thetadot = x(6);
+  thetadot = x(5);
+  hdot     = x(6);
   fr       = u(1);
   fl       = u(2);
   
@@ -118,7 +119,7 @@ function sys=mdlDerivatives(t,x,u,AP)
   hddot     = (-(AP.mc+2*AP.mr)*AP.g + (fr+fl)*cos(theta))/(AP.mc+2*AP.mr);
   thetaddot = AP.d*(fr-fl)/(AP.Jc+2*AP.mr*AP.d^2);
   
-sys = [zdot; hdot; thetadot; zddot; hddot; thetaddot];
+sys = [zdot; thetadot; hdot; zddot; thetaddot; hddot];
 
 % end mdlDerivatives
 
@@ -142,14 +143,14 @@ sys = [];
 %=============================================================================
 %
 function sys=mdlOutputs(t,x,u)
-  z        = x(1);
-  h        = x(2);
-  theta    = x(3);
-  zdot     = x(4);
-  hdot     = x(5);
-  thetadot = x(6);
+z        = x(1);
+theta        = x(2);
+h    = x(3);
+zdot     = x(4);
+thetadot     = x(5);
+hdot = x(6);
 
-  sys = x;
+sys = x;
 
 % end mdlOutputs
 

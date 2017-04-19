@@ -2,8 +2,8 @@ function drawVTOL(u)
 
     % process inputs to function
     z_v      = u(1);
-    h        = u(2);
-    theta    = u(3);
+    theta        = u(2);
+    h    = u(3);
     %z_t      = u(4);
     t        = u(4);
     
