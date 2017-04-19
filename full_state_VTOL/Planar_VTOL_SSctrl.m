@@ -80,7 +80,7 @@ T_tilde = -P.K*xhat_z + P.kr*z_d + P.Ki_z*integrator - dhat_z;
 %insert LQR stuff
 xhat = [xhat_z(1:2,1); xhat_h(1,1); xhat_z(3:4,1); xhat_h(2,1)]; 
 u = -P.K_lqr*xhat;
-output = [u(2,1) + Fe; u(1,1); xhat_h; xhat_z];
+output = [u(2,1) + Fe; u(1,1); xhat];
 
 %integrator on h anti-windup
 if P.Ki_h ~= 0,
