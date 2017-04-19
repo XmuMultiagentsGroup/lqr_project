@@ -18,7 +18,7 @@ AP.theta0 = 0;
 AP.thetadot0 = 0;
 
 % assumed system paramters used for design
-P.mc = 1.05*AP.mc;  % kg
+P.mc = 1.0*AP.mc;  % kg
 P.mr = 1*AP.mr;     % kg
 P.ml = P.mr; % kg
 P.Jc = 1*AP.Jc; %kg m^2
@@ -27,7 +27,7 @@ P.mu = 1*AP.mu; % kg/s
 P.g = 9.81; % m/s^2
 
 %Input disturbances
-AP.F_wind = 0.1;
+AP.F_wind = 0.0;
 
 % saturation limits for each rotor
 P.fmax = 10;
@@ -207,11 +207,12 @@ P.D_full = [0; 0; 0];
 %LQR stuff
 P.Q = [1, 0, 0, 0, 0, 0;
        0, 1, 0, 0, 0, 0;
-       0, 0, 1, 0, 0, 0;
+       0, 0, 200, 0, 0, 0;
        0, 0, 0, 1, 0, 0;
        0, 0, 0, 0, 1, 0;
-       0, 0, 0, 0, 0, 1];
-P.R = eye(2);
+       0, 0, 0, 0, 0, 100];
+P.R = [1, 0;
+       0, 1];
 
 %compute gain K
 P.K_lqr = lqr(P.A_full, P.B_full, P.Q, P.R);
