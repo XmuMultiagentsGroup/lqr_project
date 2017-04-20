@@ -1,19 +1,34 @@
-function output = SSctrl_full_state_fb(in,P)
+function output = SSctrl_output_observer_fb(in,P)
 h_d   = in(1);
 z_d   = in(2);
 z     = in(3);
 theta     = in(4);
 h = in(5);
-zdot     = in(6);
-thetadot     = in(7);
-hdot = in(8);
-t     = in(9);
-
-x = [z; theta; h; zdot; thetadot; hdot];
+%zdot     = in(6);
+%thetadot     = in(7);
+%hdot = in(8);
+t     = in(6);
 
 %___equilibrium___
 Fe = (P.mc+2*P.mr)*P.g;
 %Fe = 0;
+
+%___Observer Implementation___
+
+persistent xhat
+persistent F_out
+persistent T_out
+if t<P.Ts,
+    xhat = [0; 0; 0; 0; 0; 0];
+    F_out      = 0;
+    T_out = 0;
+    
+end
+N = 10;
+for i=1:N,
+    xhat = xhat + P.Ts/N*...
+        (P.A_full*(xhat) + P.B_full*[T_out; F_out - Fe] + P.L_full*([z; theta; h] - P.C_full*xhat));
+end
 
 %___add integrators___
 
@@ -26,7 +41,7 @@ if t<P.Ts==1,
     integrator_h  = 0;
     error_d1_h   = 0;
 end
-if abs(x(6))<0.1,  % note that x6=hdot
+if abs(xhat(6))<0.1,  % note that x6=hdot
     integrator_h = integrator_h + (P.Ts/2)*(error_h+error_d1_h);
 end
 error_d1_h = error_h;
@@ -40,7 +55,7 @@ if t<P.Ts==1,
     integrator_z  = 0;
     error_d1_z   = 0;
 end
-if abs(x(4))<0.1,  % note that x4=zdot
+if abs(xhat(4))<0.1,  % note that x4=zdot
     integrator_z = integrator_z + (P.Ts/2)*(error_z +error_d1_z);
 end
 error_d1_z = error_z;
@@ -52,7 +67,7 @@ error_d1_z = error_z;
 x_desired = [z_d; 0; h_d; 0; 0; 0];
 
 %calculate the output u
-u = -P.K_lqr*(x - x_desired);
+u = -P.K_lqr*(xhat - x_desired);
 
 %add the extra output from the integrator
 u(2,1) = u(2,1) + P.k_integrator_h*integrator_h;

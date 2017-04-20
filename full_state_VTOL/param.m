@@ -18,7 +18,7 @@ AP.theta0 = 0;
 AP.thetadot0 = 0;
 
 % assumed system paramters used for design
-P.mc = 1.2*AP.mc;  % kg
+P.mc = 1.0*AP.mc;  % kg
 P.mr = 1*AP.mr;     % kg
 P.ml = P.mr; % kg
 P.Jc = 1*AP.Jc; %kg m^2
@@ -27,7 +27,7 @@ P.mu = 1*AP.mu; % kg/s
 P.g = 9.81; % m/s^2
 
 %Input disturbances
-AP.F_wind = 0.3;
+AP.F_wind = 0.0;
 
 % saturation limits for each rotor
 P.fmax = 10;
@@ -223,5 +223,22 @@ P.k_integrator_z = 0.1;
 P.k_integrator_h = 2;
 
 
+% Observer Design
+wn_z_obs = 10*wn_z;
+wn_th_obs = 5*wn_th;
+wn_h_obs = 10*wn_h;
 
+des_observer_char_poly = conv([1,2*zeta_z*wn_z_obs,wn_z_obs^2],...
+                      [1,2*zeta_th*wn_th_obs,wn_th_obs^2]);
+des_observer_char_poly = conv(des_observer_char_poly,...
+                      [1,2*zeta_h*wn_h_obs,wn_h_obs^2]);
+                  
+des_observer_poles = roots(des_observer_char_poly);
+
+% is the system observable?
+if rank(obsv(P.A_full,P.C_full))~=6, 
+    disp('System Not Observable'); 
+else % if so, compute gains
+   P.L_full = place(P.A_full', P.C_full', [des_observer_poles])';
+end
 
