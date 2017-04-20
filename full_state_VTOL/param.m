@@ -18,7 +18,7 @@ AP.theta0 = 0;
 AP.thetadot0 = 0;
 
 % assumed system paramters used for design
-P.mc = 1.0*AP.mc;  % kg
+P.mc = 1.3*AP.mc;  % kg
 P.mr = 1*AP.mr;     % kg
 P.ml = P.mr; % kg
 P.Jc = 1*AP.Jc; %kg m^2
@@ -27,7 +27,7 @@ P.mu = 1*AP.mu; % kg/s
 P.g = 9.81; % m/s^2
 
 %Input disturbances
-AP.F_wind = 0.0;
+AP.F_wind = 0.1;
 
 % saturation limits for each rotor
 P.fmax = 10;
@@ -219,11 +219,35 @@ P.R = [1, 0;
 P.K_lqr = lqr(P.A_full, P.B_full, P.Q, P.R);
 
 %integrator gains for steady-state error
-P.k_integrator_z = 0.1;
-P.k_integrator_h = 2;
+P.k_integrator_z = 0.1; %0.1;
+P.k_integrator_h = 2; %2;
 
 
-% Observer Design
+% % Observer Design (no disturbance observer)
+% wn_z_obs = 10*wn_z;
+% wn_th_obs = 5*wn_th;
+% wn_h_obs = 10*wn_h;
+% 
+% des_observer_char_poly = conv([1,2*zeta_z*wn_z_obs,wn_z_obs^2],...
+%                       [1,2*zeta_th*wn_th_obs,wn_th_obs^2]);
+% des_observer_char_poly = conv(des_observer_char_poly,...
+%                       [1,2*zeta_h*wn_h_obs,wn_h_obs^2]);
+%                   
+% des_observer_poles = roots(des_observer_char_poly);
+% 
+% % is the system observable?
+% if rank(obsv(P.A_full,P.C_full))~=6, 
+%     disp('System Not Observable'); 
+% else % if so, compute gains
+%    P.L_full = place(P.A_full', P.C_full', [des_observer_poles])';
+% end
+
+% Observer Design (WITH disturbance observer)
+
+%augment the system with zeros one for each disturbance
+A2_full = [P.A_full, P.B_full; zeros(2,6), zeros(2,2)];
+C2_full = [P.C_full, zeros(3,2)];
+
 wn_z_obs = 10*wn_z;
 wn_th_obs = 5*wn_th;
 wn_h_obs = 10*wn_h;
@@ -235,10 +259,14 @@ des_observer_char_poly = conv(des_observer_char_poly,...
                   
 des_observer_poles = roots(des_observer_char_poly);
 
+dist_obsv_poles = [-1; -1];
+
 % is the system observable?
-if rank(obsv(P.A_full,P.C_full))~=6, 
+if rank(obsv(A2_full,C2_full))~=8, 
     disp('System Not Observable'); 
 else % if so, compute gains
-   P.L_full = place(P.A_full', P.C_full', [des_observer_poles])';
+   L = place(A2_full', C2_full', [des_observer_poles; dist_obsv_poles])';
+   P.L_full = L(1:6,:);
+   P.Ld_full = L(7:8,:);
 end
 

@@ -4,9 +4,6 @@ z_d   = in(2);
 z     = in(3);
 theta     = in(4);
 h = in(5);
-%zdot     = in(6);
-%thetadot     = in(7);
-%hdot = in(8);
 t     = in(6);
 
 %___equilibrium___
@@ -16,18 +13,25 @@ Fe = (P.mc+2*P.mr)*P.g;
 %___Observer Implementation___
 
 persistent xhat
+persistent dhat
 persistent F_out
 persistent T_out
 if t<P.Ts,
     xhat = [0; 0; 0; 0; 0; 0];
+    dhat = [0; 0];
+    dhat_h = 0;
+    dhat_z = 0;
     F_out      = 0;
     T_out = 0;
-    
 end
+
 N = 10;
 for i=1:N,
+%     xhat = xhat + P.Ts/N*...
+%         (P.A_full*(xhat) + P.B_full*[T_out; F_out - Fe] + P.L_full*([z; theta; h] - P.C_full*xhat));
     xhat = xhat + P.Ts/N*...
-        (P.A_full*(xhat) + P.B_full*[T_out; F_out - Fe] + P.L_full*([z; theta; h] - P.C_full*xhat));
+        (P.A_full*(xhat) + P.B_full*[T_out + dhat(1,1); F_out - Fe + dhat(2,1)] + P.L_full*([z; theta; h] - P.C_full*xhat));
+    dhat = dhat + P.Ts/N*P.Ld_full*([z;theta;h]-P.C_full*xhat);
 end
 
 %___add integrators___
@@ -70,15 +74,15 @@ x_desired = [z_d; 0; h_d; 0; 0; 0];
 u = -P.K_lqr*(xhat - x_desired);
 
 %add the extra output from the integrator
-u(2,1) = u(2,1) + P.k_integrator_h*integrator_h;
-u(1,1) = u(1,1) + P.k_integrator_z*integrator_z;
+u(2,1) = u(2,1) + P.k_integrator_h*integrator_h - dhat(2,1);
+u(1,1) = u(1,1) + P.k_integrator_z*integrator_z - dhat(1,1);
 
 %apply saturation
 F_out = sat(u(2,1) + Fe, 2*P.fmax);
 T_out = sat(u(1,1), P.taumax);
 
 %send the output
-output = [F_out; T_out];
+output = [F_out; T_out; xhat; dhat];
 
 % %integrator on h anti-windup
 % if P.k_integrator_h ~= 0,
