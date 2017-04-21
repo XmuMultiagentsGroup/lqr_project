@@ -1,0 +1,26 @@
+\documentclass[dvips,12pt]{article}
+
+\usepackage[pdftex]{graphicx}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage{url}
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{amsmath}
+\usepackage{txfonts}
+
+% From amsmath, prepend equation numbers with section number
+%\numberwithin{equation}{section}
+
+% graphicx: Where should graphics be found?
+\graphicspath{ {figures/} }
+
+% Setup margins and paper size
+\geometry{
+  letterpaper,
+  total={170mm,257mm},
+  left=20mm,
+  top=20mm,
+  bottom=25mm
+}
