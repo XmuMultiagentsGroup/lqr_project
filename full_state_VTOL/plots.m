@@ -1,22 +1,26 @@
 %plots
 close all
 
-% %___SYSTEM OUTPUT PLOTS___
-% figure(1)
-% plot(h_desired.time, h_desired.signals.values,'-.',h_output.time, h_output.signals.values)
-% title('LQR Full Observed State Feedback (height displacement)')
-% xlabel('time (s)')
-% ylabel('height (m)')
-% legend('h reference', 'h')
-% axis([0, 200, -1, 7])
-% 
-% figure(2)
-% plot(z_desired.time, z_desired.signals.values,'-.',z_output.time, z_output.signals.values)
-% title('LQR Full Observed State Feedback (horizontal displacement)')
-% xlabel('time (s)')
-% ylabel('horizontal position, z (m)')
+%___SYSTEM OUTPUT PLOTS___
+figure(1)
+subplot(2,1,1)
+plot(h_desired.time, h_desired.signals.values,'-.',h_output.time, h_output.signals.values)
+str = {'Set-Point Control for h'};
+title(str, 'Interpreter','latex')
+str2 = {'$ h $ (m)'};
+ylabel(str2, 'Interpreter','latex')
+legend('h reference', 'h')
+axis([0, 100, -1, 8])
+
+subplot(2,1,2)
+plot(z_desired.time, z_desired.signals.values,'-.',z_output.time, z_output.signals.values)
+str = {'Set-Point Control for z'};
+title(str, 'Interpreter','latex')
+xlabel('time (s)')
+str2 = {'$ z $ (m)'};
+ylabel(str2, 'Interpreter','latex')
 % legend('z reference', 'z')
-% axis([0, 200, -1, 7])
+axis([0, 100, -1, 7])
 
 
 % %___STATE ESTIMATE PLOTS___
@@ -104,8 +108,7 @@ close all
 % 
 % subplot(2,1,2)
 % plot(h_output.time, h_output.signals.values(:,1))
-% str = {'Step Response in h'};
-% title(str, 'Interpreter','latex')
+
 % str2 = {'$ h $ (m)'};
 % ylabel(str2, 'Interpreter','latex')
 % xlabel('time (s)')

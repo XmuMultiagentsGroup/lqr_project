@@ -18,7 +18,7 @@ AP.theta0 = 0;
 AP.thetadot0 = 0;
 
 % assumed system paramters used for design
-P.mc = 1.0*AP.mc;  % kg
+P.mc = 0.7*AP.mc;  % kg
 P.mr = 1*AP.mr;     % kg
 P.ml = P.mr; % kg
 P.Jc = 1*AP.Jc; %kg m^2
@@ -27,7 +27,7 @@ P.mu = 1*AP.mu; % kg/s
 P.g = 9.81; % m/s^2
 
 %Input disturbances
-AP.F_wind = 0.0;
+AP.F_wind = 0.5;
 
 % saturation limits for each rotor
 P.fmax = 10;
@@ -201,7 +201,11 @@ P.C_full = [1, 0, 0, 0, 0, 0;
             0, 1, 0, 0, 0, 0;
             0, 0, 1, 0, 0, 0];
         
-P.D_full = [0; 0; 0];
+P.D_full = [0, 0; 0, 0; 0, 0];
+
+
+%Check to see if system is controlable
+if rank(ctrb(P.A_full,P.B_full)) ~= 6, disp('System Not Controllable');end
 
 
 %LQR stuff
@@ -219,8 +223,8 @@ P.R = [1, 0;
 P.K_lqr = lqr(P.A_full, P.B_full, P.Q, P.R);
 
 %integrator gains for steady-state error
-P.k_integrator_z = 0.0; %0.1;
-P.k_integrator_h = 0; %2;
+P.k_integrator_z = 0.1; %0.1;
+P.k_integrator_h = 2; %2;
 
 
 % % Observer Design (no disturbance observer)

@@ -52,8 +52,8 @@ error_d1_z = error_z;
 x_desired = [z_d; 0; h_d; 0; 0; 0];
 
 %calculate the output u
-%u = -P.K_lqr*(x - x_desired);
-u = -P.K_lqr*x;
+u = -P.K_lqr*(x - x_desired);
+%u = -P.K_lqr*x;
 
 %add the extra output from the integrator
 u(2,1) = u(2,1) + P.k_integrator_h*integrator_h;
