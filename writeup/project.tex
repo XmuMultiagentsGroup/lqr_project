@@ -190,7 +190,7 @@ $
             \end{bmatrix}         
 $
 \end{center}
-The optimal gain $K$ for the VTOL system was then found using MATLAB's \textit{lqr(A,B,Q,R)} function.  Implementing the full-state feedback LQR controller consisted of defining the basic control law of $u = -Kx$ where $u$ is the input to the plant or, and $x$ is the state vector.  To test the LQR controller, the VTOL was initialized a small distance away from \textit{zero} and the response was observed (see Figure ~\ref{fig:stepresp}).  As can be seen from the step response, the LQR controller does good job of regulating the VTOL $z$-displacement and $h$-displacement to \textit{zero}. 
+The optimal gain $K$ for the VTOL system was then found using MATLAB's \textit{lqr(A,B,Q,R)} function.  Implementing the full-state feedback LQR controller consisted of defining the basic control law of $u = -Kx$ where $u$ is the input to the plant or, and $x$ is the state vector.  To test the LQR controller, the VTOL was initialized a small distance away from \textit{zero} and the response was observed (see Figure ~\ref{fig:stepresp}).  As can be seen from the step response, the LQR controller does good job of regulating the VTOL $z$-displacement and $h$-displacement (as well as all other states) to \textit{zero}. 
 
 
 \begin{figure}
@@ -277,7 +277,64 @@ For almost all real dynamic systems, assuming full-state feedback is unrealistic
                   \end{bmatrix}
                   r         
 \end{gather}}
-Here $K$ is the optimal gain found previously with $L$ being the observer gain.  For the our system, the observer poles were chosen to be about 10-times larger than the corresponding open-loop poles of the VTOL.  This ensures that the observer can keep up and reliably generate a good state estimate $\hat{x}$.  Once the observer poles had been set, and thanks to the duality between $A$ and $A^\intercal$, and $B$ and $C^\intercal$,  the observer gain $L$ could be computed using the MATLAB \textit{place()} command.
+Here $K$ is the optimal gain found previously with $L$ being the observer gain.  For the our system, the observer poles were chosen to be about 10-times greater than the corresponding open-loop poles of the VTOL.  This ensures that the observer can keep up and reliably generate a good state estimate $\hat{x}$.  Once the observer poles had been set, and thanks to the duality between $A$ and $A^\intercal$, and $B$ and $C^\intercal$,  the observer gain $L$ could be computed using the MATLAB \textit{place()} command.  A plot showing the performance of the observer state estimator is given in Figure  ~\ref{fig:stateestimate}.
+
+\begin{figure}[h] %  figure placement: here, top,  bottom, or page
+   \centering
+   \includegraphics[trim = {4cm 8.5cm 4cm 9cm},clip,width=5.5in]{observerstates.pdf}
+   \caption{Actual (solid) vs estimated (dotted) VTOL states}
+   \label{fig:stateestimate}
+\end{figure}
+
+When the VTOL simulation was modified to implement the observer, set-point performance was still very good as long as there were no unknown disturbances.  When disturbances were added, steady-state offset was seen even in the presence of integrators on $z$ and $h$.  This is due to the fact that the observer was only set up to estimate the VTOL state and not to account for these unknown disturbances.  The solution was to implement a disturbance observer by augmenting the $A$ and $C$ matrices as follows:
+\begin{equation}
+ \bar{A}
+ = 
+   \begin{bmatrix}
+        A & B  \\
+        0 & 0  \\
+
+      \end{bmatrix}
+      \quad
+      \bar{C}
+       = 
+         \begin{bmatrix}
+              C & 0  \\
+            \end{bmatrix}         
+\end{equation}
+
+Once again the MATLAB \textit{place()} command could be used to find our new observer gain $\bar{L}$ to include terms for the unknown disturbances. Similar to how the $\hat{x}$ estimator was implemented, a $\hat{d}$ estimator was added and the control law modified accordingly. Set-point results of adding the disturbance estimator in the presence of disturbances and integrators can be seen in Figure ~\ref{fig:nodistobsvsdistobs}.  A plot of the estimated disturbances is given in Figure ~\ref{fig:dhat}.
+
+\begin{figure}[h]
+\centering
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[trim = {4cm 8.5cm 4cm 8.5cm},clip,width=3in]{observer_w_dist_and_int.pdf}
+  \caption{Without disturbance observer}
+  \label{fig:sub3}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[trim = {4cm 8.5cm 4cm 8.5cm},clip,width=3in]{dist_observer_w_dist_and_int.pdf}
+  \caption{With disturbance observer}
+  \label{fig:sub4}
+\end{subfigure}
+\caption{Comparison between VTOL outputs without and with disturbance observer}
+\label{fig:nodistobsvsdistobs}
+\end{figure}
+
+\begin{figure}[h] %  figure placement: here, top,  bottom, or page
+   \centering
+   \includegraphics[trim = {4cm 8.5cm 4cm 8.5cm},clip,width=3.0in]{dhat.pdf}
+   \caption{Individual $z$ and $h$ components of $\hat{d}$}
+   \label{fig:dhat}
+\end{figure}
+
+Comparing the plots of $\hat{d}$ with the actual disturbances applied to the system showed that the disturbance estimator was performing satisfactorily.
+
+\section{Conclusion}
+The planar VTOL turned out to be an ideal dynamic system for experimenting with the principles of LQR control.  LQR as a state regulator, set-point controller, and Observer-based LQR were all successfully implemented with overall excellent system response.  In all cases, the LQR controller provided critically-damped system response with negligible ringing or overshoot. Further work could include augmenting the system $A$ matrix to bring the integrator gain $k_i$ into the optimal $K$ gain.  Doing so would add the advantage of having an integrator while still maintaining all stability guarantees inherent with LQR. If measurement noise were to be added to the system, a more advanced state estimator such as the EKF could be implemented. 
+
 \end{document}
 
 %\begin{figure}

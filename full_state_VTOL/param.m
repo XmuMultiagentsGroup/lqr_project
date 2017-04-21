@@ -10,15 +10,15 @@ AP.mu = 0.1; % kg/s
 AP.g = 9.81; % m/s^2
 
 % initial conditions
-AP.z0 = 3;
+AP.z0 = 0;
 AP.zdot0 = 0;
-AP.h0 = 3;
+AP.h0 = 0;
 AP.hdot0 = 0;
 AP.theta0 = 0;
 AP.thetadot0 = 0;
 
 % assumed system paramters used for design
-P.mc = 0.7*AP.mc;  % kg
+P.mc = 0.6*AP.mc;  % kg
 P.mr = 1*AP.mr;     % kg
 P.ml = P.mr; % kg
 P.Jc = 1*AP.Jc; %kg m^2
@@ -27,7 +27,7 @@ P.mu = 1*AP.mu; % kg/s
 P.g = 9.81; % m/s^2
 
 %Input disturbances
-AP.F_wind = 0.5;
+AP.F_wind = 0.1;
 
 % saturation limits for each rotor
 P.fmax = 10;

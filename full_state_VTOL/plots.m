@@ -84,7 +84,7 @@ axis([0, 100, -1, 7])
 % str2 = {'Wind Force (N)'};
 % ylabel(str2, 'Interpreter','latex')
 % % xlabel('time (s)')
-% axis([0, 200, -0.4, 0.4])
+% axis([0, 100, -0.3, 0.3])
 % 
 % subplot(2,1,2)
 % plot(dhat.time, dhat.signals.values(:,2))
@@ -93,7 +93,7 @@ axis([0, 100, -1, 7])
 % str2 = {'Vertical Force (N)'};
 % ylabel(str2, 'Interpreter','latex')
 % xlabel('time (s)')
-% axis([0, 200, -1, 5])
+% axis([0, 100, -6, 0])
 
 % 
 % figure(1)

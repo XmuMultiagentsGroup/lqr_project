@@ -19,8 +19,6 @@ persistent T_out
 if t<P.Ts,
     xhat = [0; 0; 0; 0; 0; 0];
     dhat = [0; 0];
-    dhat_h = 0;
-    dhat_z = 0;
     F_out      = 0;
     T_out = 0;
 end
@@ -77,12 +75,16 @@ u = -P.K_lqr*(xhat - x_desired);
 u(2,1) = u(2,1) + P.k_integrator_h*integrator_h - dhat(2,1);
 u(1,1) = u(1,1) + P.k_integrator_z*integrator_z - dhat(1,1);
 
+% u(2,1) = u(2,1) + P.k_integrator_h*integrator_h
+% u(1,1) = u(1,1) + P.k_integrator_z*integrator_z
+
 %apply saturation
 F_out = sat(u(2,1) + Fe, 2*P.fmax);
 T_out = sat(u(1,1), P.taumax);
 
 %send the output
 output = [F_out; T_out; xhat; dhat];
+% output = [F_out; T_out; xhat];
 
 % %integrator on h anti-windup
 % if P.k_integrator_h ~= 0,
